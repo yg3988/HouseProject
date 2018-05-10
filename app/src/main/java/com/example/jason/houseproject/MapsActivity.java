@@ -1,10 +1,17 @@
 package com.example.jason.houseproject;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -13,6 +20,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import static android.location.LocationManager.GPS_PROVIDER;
+import static android.location.LocationManager.NETWORK_PROVIDER;
 import static com.google.android.gms.maps.CameraUpdateFactory.*;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -20,6 +29,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     static final LatLng JINJU = new LatLng(35.180291, 128.107830);
 
+    double myLocationLatitude; //latitude ex(35.1564454)
+    double myLocationLongitude; //longitude ex(128.10819728)
+
+    LatLng myLocationLatLng;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +42,77 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        final TextView textViewLog = (TextView)findViewById(R.id.textViewLog);
+
+        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+        boolean isGPSEnabled = locationManager.isProviderEnabled(GPS_PROVIDER);
+
+        boolean isNetworkEnabled = locationManager.isProviderEnabled(NETWORK_PROVIDER);
+
+        LocationListener locationListener = new LocationListener() {
+            public void onLocationChanged(Location location) {
+                double lat = location.getLatitude();
+                double lng = location.getLongitude();
+
+                myLocationLatitude = location.getLatitude();
+                myLocationLongitude = location.getLongitude();
+                myLocationLatLng = new LatLng(myLocationLatitude,myLocationLongitude);
+
+                textViewLog.setText("지역변수 lat : " + Double.toString(lat) + ",   lon : " +Double.toString(lng));
+            }
+
+            public void onStatusChanged(String provider, int status, Bundle extras) { textViewLog.setText("onStatusChanged"); }
+
+            public void onProviderEnabled(String provider) {textViewLog.setText("onProviderEnabled"); }
+
+            public void onProviderDisabled(String provider) { textViewLog.setText("onProviderDisabled"); }
+        };
+
+        // Register the listener with the Location Manager to receive location updates
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        locationManager.requestLocationUpdates(NETWORK_PROVIDER, 0, 0, locationListener);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        locationManager.requestLocationUpdates(GPS_PROVIDER, 0, 0, locationListener);
+
+        // 수동으로 위치 구하기
+        String locationProvider = GPS_PROVIDER;
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
+        if (lastKnownLocation != null) {
+            double lng = lastKnownLocation.getLatitude();
+            double lat = lastKnownLocation.getLatitude();
+
+            myLocationLatLng = new LatLng(lng,lat);
+        }
     }
 
 
@@ -46,9 +130,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mMap = googleMap;
         mMap.moveCamera(newLatLngZoom(new LatLng(35.154265,128.098157), 16));
-
-
-
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -76,6 +157,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .position(new LatLng(35.154265, 128.098157))
                 .title("경상대학교").snippet("This place is GNU"));
 
+        ImageButton addButton = findViewById(R.id.LocationAddButton);
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mMap.addMarker(new MarkerOptions().position(myLocationLatLng).title("위도경도 리턴 테스트중  ").snippet("이다음엔 어떻게 만들어야 잘 만들었다고 소문이 날까? "));
 
+
+            }
+        });
     }
 }
