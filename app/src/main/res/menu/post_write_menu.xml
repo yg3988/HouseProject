@@ -3,8 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/openGallery"
+        android:title="갤러리"
+        android:icon="@android:drawable/ic_menu_gallery"
+        app:showAsAction="always"/>
+    <item
         android:id="@+id/newPost"
-        android:title="게시하기"
+        android:title="게시"
         app:showAsAction="always" />
 
 </menu>

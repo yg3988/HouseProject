@@ -39,8 +39,6 @@ public class AngelBoardActivity extends AppCompatActivity
     String boardNickname;
     String boardDay;
 
-    Button btnWrite;
-
     private static final String TAG_RESULT = "result";
     private static final String TAG_BOARDNO = "no";
     private static final String TAG_SUBJECT = "sub";
@@ -60,7 +58,7 @@ public class AngelBoardActivity extends AppCompatActivity
         listView = (ListView)findViewById(R.id.listBoard);
 
         arrBoard=new ArrayList<HashMap<String, String>>();
-        getData("http://35.194.105.42/boardList.php");
+        getData("http://cir112.cafe24.com/boardList.php");
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -88,6 +86,7 @@ public class AngelBoardActivity extends AppCompatActivity
         if( id == R.id.newPost ){
             Intent intent = new Intent(getApplicationContext(), AngelBoardPostWrite.class);
             startActivity(intent);
+            finish();
             return true;
         }
 
@@ -129,7 +128,7 @@ public class AngelBoardActivity extends AppCompatActivity
                     (
                             AngelBoardActivity.this,
                             arrBoard,
-                            R.layout.angel_board_item,
+                            R.layout.board_angel_listview_item,
                             new String[]{TAG_BOARDNO,TAG_SUBJECT,TAG_NICK,TAG_HIT,TAG_DATE},
                             new int[]{R.id.item_no, R.id.sub, R.id.nick,R.id.hit,R.id.date}
                     );

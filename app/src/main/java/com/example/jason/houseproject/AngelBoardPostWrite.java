@@ -9,7 +9,10 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -30,14 +33,13 @@ public class AngelBoardPostWrite extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.angel_post_write);
+        setContentView(R.layout.board_angel_post_write);
 
         toolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
 
         editTextSub = (EditText)findViewById(R.id.editTextSubject);
         editTextCon = (EditText)findViewById(R.id.editTextContents);
-
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -59,6 +61,16 @@ public class AngelBoardPostWrite extends AppCompatActivity
 
             Intent intent = new Intent(getApplicationContext(), AngelBoardActivity.class);
             startActivity(intent);
+            finish();
+            return true;
+        }
+        if(id==R.id.openGallery){
+            final int REQ_CODE_SELECT_IMAGE=100;
+
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setType(android.provider.MediaStore.Images.Media.CONTENT_TYPE);
+            intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(intent, REQ_CODE_SELECT_IMAGE);
             return true;
         }
 
@@ -85,17 +97,17 @@ public class AngelBoardPostWrite extends AppCompatActivity
         }
 
         @Override
-        protected String doInBackground(String... params){
-            String name = (String)params[0];
-            String subject = (String)params[1];
-            String contents = (String)params[2];
+        protected String doInBackground(String... params) {
+            String name = (String) params[0];
+            String title = (String) params[1];
+            String contents = (String) params[2];
 
-            String strUrl = "http://35.194.105.42/insert_Post.php";
-            String postParams = "name="+name+"&subject="+subject+"&contents="+contents;
+            String strUrl = "http://cir112.cafe24.com/insert_Post.php";
+            String postParams = "name=" + name + "&title=" + title + "&contents=" + contents;
 
-            try{
-                URL url=new URL(strUrl);
-                HttpURLConnection httpURLConnection = (HttpURLConnection)url.openConnection();
+            try {
+                URL url = new URL(strUrl);
+                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
 
                 httpURLConnection.setReadTimeout(5000);
                 httpURLConnection.setConnectTimeout(5000);
@@ -109,34 +121,33 @@ public class AngelBoardPostWrite extends AppCompatActivity
                 outputStream.close();
 
                 int responseStatusCode = httpURLConnection.getResponseCode();
-                Log.d(TAG, "POST response code - "+responseStatusCode);
+                Log.d(TAG, "POST response code - " + responseStatusCode);
 
                 InputStream inputStream;
-                if(responseStatusCode==HttpURLConnection.HTTP_OK){
+                if (responseStatusCode == HttpURLConnection.HTTP_OK) {
                     inputStream = httpURLConnection.getInputStream();
-                }else{
+                } else {
                     inputStream = httpURLConnection.getErrorStream();
                 }
 
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream,"UTF-8");
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
                 StringBuilder sb = new StringBuilder();
                 String line = null;
 
-                while((line=bufferedReader.readLine()) != null){
+                while ((line = bufferedReader.readLine()) != null) {
                     sb.append(line);
                 }
 
                 bufferedReader.close();
 
                 return sb.toString();
-            }catch (Exception e){
-                Log.d(TAG,"InsertData : Error", e);
+            } catch (Exception e) {
+                Log.d(TAG, "InsertData : Error", e);
 
-                return new String("Error: "+e.getMessage());
+                return new String("Error: " + e.getMessage());
             }
         }
-
     }
 }
