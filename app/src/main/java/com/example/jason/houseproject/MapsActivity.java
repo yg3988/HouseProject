@@ -1,19 +1,30 @@
 package com.example.jason.houseproject;
 
 import android.Manifest;
+import android.app.AlarmManager;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListAdapter;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -22,6 +33,19 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
 
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
@@ -32,10 +56,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     static final LatLng JINJU = new LatLng(35.180291, 128.107830);
 
-    double myLocationLatitude; //latitude ex(35.1564454)
-    double myLocationLongitude; //longitude ex(128.10819728)
+    double myLocationLatitude = .0d;
+    double myLocationLongitude = .0d;
 
     LatLng myLocationLatLng;
+
+    JSONArray list=null;
+    String myJson;
+
+    private static final String TAG_RESULT = "result";
+    private static final String TAG_NAME = "name";
+    private static final String TAG_LATITUDE = "latitude";
+    private static final String TAG_LONGITUDE = "longitude";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,14 +88,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         LocationListener locationListener = new LocationListener() {
             public void onLocationChanged(Location location) {
-                double lat = location.getLatitude();
-                double lng = location.getLongitude();
-
                 myLocationLatitude = location.getLatitude();
                 myLocationLongitude = location.getLongitude();
                 myLocationLatLng = new LatLng(myLocationLatitude,myLocationLongitude);
 
-                textViewLog.setText("지역변수 lat : " + Double.toString(lat) + ",   lon : " +Double.toString(lng));
+                textViewLog.setText("지역변수 lat : " + Double.toString(myLocationLatitude) + ",   lon : " +Double.toString(myLocationLongitude));
             }
 
             public void onStatusChanged(String provider, int status, Bundle extras) { textViewLog.setText("onStatusChanged"); }
@@ -111,10 +140,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
         if (lastKnownLocation != null) {
-            double lng = lastKnownLocation.getLatitude();
-            double lat = lastKnownLocation.getLatitude();
+            myLocationLatitude = lastKnownLocation.getLatitude();
+            myLocationLongitude = lastKnownLocation.getLongitude();
 
-            myLocationLatLng = new LatLng(lng,lat);
+            myLocationLatLng = new LatLng(myLocationLatitude,myLocationLongitude);
         }
     }
 
@@ -132,21 +161,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         final int MY_PERMISSIONS_ACCESS_COARSE_LOCATION = 1;
         mMap = googleMap;
-        mMap.moveCamera(newLatLngZoom(new LatLng(35.154265,128.098157), 16));
-
-        mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(35.180291, 128.107830))
-                .title("JinJu Cityhall")
-                .snippet("Population: 8,174 million (2011)").draggable(true));
-
-        mMap.addMarker(new MarkerOptions()
-                .position(JINJU));
-
-        mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(35.154265, 128.098157))
-                .title("경상대학교").snippet("This place is GNU"));
-
-        mMap.setOnInfoWindowClickListener(this);
 
         if (ContextCompat.checkSelfPermission(MapsActivity.this,
                 Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -174,16 +188,67 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
 
-
         mMap.setMyLocationEnabled(true);
+
+        mMap.moveCamera(newLatLngZoom(new LatLng(35.154265,128.098157), 16));
+
+        getData("http://cir112.cafe24.com/mapMarkerInfo.php");
+
+        mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(35.180291, 128.107830))
+                .title("JinJu Cityhall")
+                .snippet("Population: 8,174 million (2011)").draggable(true));
+
+        mMap.addMarker(new MarkerOptions()
+                .position(JINJU));
+
+        mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(35.154265, 128.098157))
+                .title("경상대학교").snippet("This place is GNU"));
+
+        mMap.setOnInfoWindowClickListener(this);
 
         ImageButton addButton = findViewById(R.id.LocationAddButton);
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mMap.addMarker(new MarkerOptions().position(myLocationLatLng).title("위도경도 리턴 테스트중  ").snippet("이다음엔 어떻게 만들어야 잘 만들었다고 소문이 날까? "));
+                //dialog를 통한 자취방 이름 입력 후 마커 추가
+                LayoutInflater inflater = getLayoutInflater();
 
+                final View dialogView = inflater.inflate(R.layout.dialog_addmarker,null);
+                AlertDialog.Builder adBuilder = new AlertDialog.Builder(MapsActivity.this);
+                adBuilder.setTitle("자취방 입력");
+                adBuilder.setView(dialogView);
+                adBuilder.setPositiveButton("입력", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        EditText editText = (EditText)dialogView.findViewById(R.id.editTextBuildName);
+                        String buildName = editText.getText().toString();
 
+                        //DB로 좌표값과 건물이름 전송
+                        String [] strMyLocationLatLng = new String [3];
+
+                        strMyLocationLatLng[0] = Double.toString(myLocationLatitude);
+                        strMyLocationLatLng[1] = Double.toString(myLocationLongitude);
+                        strMyLocationLatLng[2] = buildName;
+
+                        InsertMaker insertMaker = new InsertMaker();
+                        insertMaker.execute(strMyLocationLatLng);
+
+                        mMap.addMarker(new MarkerOptions().position(myLocationLatLng).title(buildName).snippet("이다음엔 어떻게 만들어야 잘 만들었다고 소문이 날까? "));
+                    }
+                });
+                adBuilder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        return;
+                    }
+                });
+
+                AlertDialog dialog = adBuilder.create();
+
+                dialog.setCanceledOnTouchOutside(false);
+                dialog.show();
             }
         });
     }
@@ -218,5 +283,145 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // other 'case' lines to check for other
             // permissions this app might request
         }
+    }
+
+    //마커 정보 DB로 전송, 건물 이름, 위도, 경도 값 전송
+    public class InsertMaker extends AsyncTask<String, Void, String> {
+        ProgressDialog progressDialog;
+
+        private final String TAG="ADD_MARKER";
+
+        @Override
+        protected void onPreExecute(){
+            super.onPreExecute();
+            progressDialog = ProgressDialog.show(MapsActivity.this,"Please Wait",null,true,true);
+        }
+
+        @Override
+        protected void onPostExecute(String result){
+            super.onPostExecute(result);
+
+            progressDialog.dismiss();
+            Toast.makeText(MapsActivity.this, result, Toast.LENGTH_SHORT).show();
+            Log.d(TAG,"POST response - "+result);
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            String myLocationLatitude = (String) params[0];
+            String myLocationLongitude = (String) params[1];
+            String buildName = (String) params[2];
+
+            String strUrl = "http://cir112.cafe24.com/insertLocation.php";
+            String postParams = "latitude=" + myLocationLatitude + "&longitude=" + myLocationLongitude + "&name=" + buildName;
+
+            try {
+                URL url = new URL(strUrl);
+                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+
+                httpURLConnection.setReadTimeout(5000);
+                httpURLConnection.setConnectTimeout(5000);
+                httpURLConnection.setRequestMethod("POST");
+                httpURLConnection.setDoInput(true);
+                httpURLConnection.connect();
+
+                OutputStream outputStream = httpURLConnection.getOutputStream();
+                outputStream.write(postParams.getBytes("UTF-8"));
+                outputStream.flush();
+                outputStream.close();
+
+                int responseStatusCode = httpURLConnection.getResponseCode();
+                Log.d(TAG, "POST response code - " + responseStatusCode);
+
+                InputStream inputStream;
+                if (responseStatusCode == HttpURLConnection.HTTP_OK) {
+                    inputStream = httpURLConnection.getInputStream();
+                } else {
+                    inputStream = httpURLConnection.getErrorStream();
+                }
+
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+
+                while ((line = bufferedReader.readLine()) != null) {
+                    sb.append(line);
+                }
+
+                bufferedReader.close();
+
+                return sb.toString();
+            } catch (Exception e) {
+                Log.d(TAG, "InsertData : Error", e);
+
+                return new String("Error: " + e.getMessage());
+            }
+        }
+    }
+
+    //DB에서 자취방 정보를 가져와 마커 출력
+    protected void showList()
+    {
+        try
+        {
+            JSONObject jsonObj = new JSONObject(myJson);
+            list = jsonObj.getJSONArray(TAG_RESULT);
+
+            for(int i=0;i<list.length();i++)
+            {
+                JSONObject c = list.getJSONObject(i);
+                String name = c.getString(TAG_NAME);
+                double lat = Double.parseDouble(c.getString(TAG_LATITUDE));
+                double lng = Double.parseDouble(c.getString(TAG_LONGITUDE));
+
+                LatLng latLng = new LatLng(lat,lng);
+
+                mMap.addMarker(new MarkerOptions().position(latLng).title(name).snippet("이다음엔 어떻게 만들어야 잘 만들었다고 소문이 날까? "));
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getData(String url){
+        class GetDataJson extends AsyncTask<String, Void, String>
+        {
+            @Override
+            protected String doInBackground (String... params)
+            {
+                String strUrl = params[0];
+
+                BufferedReader bufferedReader = null;
+
+                try
+                {
+                    URL url = new URL(strUrl);
+                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                    StringBuilder sb = new StringBuilder();
+
+                    bufferedReader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+
+                    String json;
+
+                    while((json = bufferedReader.readLine())!=null)
+                    {
+                        sb.append(json + "\n");
+                    }
+                    return sb.toString().trim();
+                }catch (Exception e)
+                {
+                    return null;
+                }
+            }
+            protected void onPostExecute(String result)
+            {
+                myJson = result;
+                showList();
+            }
+        }
+        GetDataJson g = new GetDataJson();
+        g.execute(url);
     }
 }
