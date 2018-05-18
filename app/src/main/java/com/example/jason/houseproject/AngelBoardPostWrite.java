@@ -18,6 +18,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,12 +31,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 
 public class AngelBoardPostWrite extends AppCompatActivity
 {
@@ -45,6 +48,7 @@ public class AngelBoardPostWrite extends AppCompatActivity
     EditText editTextSub;
     EditText editTextCon;
     ImageView imageView;
+    Bitmap bitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -84,6 +88,10 @@ public class AngelBoardPostWrite extends AppCompatActivity
             }
         }
     }
+
+    //
+    //툴바
+    //
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.post_write_menu, menu);
@@ -118,6 +126,9 @@ public class AngelBoardPostWrite extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    //
+    //사진 업로드
+    //
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode, resultCode, data);
@@ -125,13 +136,13 @@ public class AngelBoardPostWrite extends AppCompatActivity
         if(resultCode == RESULT_OK){
             switch (requestCode){
                 case REQ_CODE_SELECT_IMAGE:
-                sendPicture(data.getData());
+                sendPictureIntoImageView(data.getData());
                 break;
             }
         }
     }
 
-    private void sendPicture(Uri data) {
+    private void sendPictureIntoImageView(Uri data) {
         imageView = (ImageView)findViewById(R.id.imageViewShot);
         String imagePath = getRealPathFromURI(data);
         ExifInterface exif = null;
@@ -142,8 +153,11 @@ public class AngelBoardPostWrite extends AppCompatActivity
             e.printStackTrace();
         }
 
-        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);//경로를 통해 비트맵으로 전환
-        imageView.setImageBitmap(bitmap);//이미지 뷰에 비트맵 넣기
+        //final BitmapFactory.Options options = new BitmapFactory.Options();          //실제 메모리로
+        //options.inJustDecodeBounds = true;                                      //이미지를 로드하지 않습니다.
+
+        bitmap = BitmapFactory.decodeFile(imagePath);                       //경로를 통해 비트맵으로 전환
+        imageView.setImageBitmap(bitmap);                                        //이미지 뷰에 비트맵 넣기
     }
 
     private String getRealPathFromURI(Uri data) {
@@ -157,10 +171,14 @@ public class AngelBoardPostWrite extends AppCompatActivity
         return cursor.getString(column_index);
     }
 
+    //
+    //글쓰기
+    //
     public class InsertPost extends AsyncTask<String, Void, String> {
         ProgressDialog progressDialog;
 
         private final String TAG="Post_write";
+        String temp = "";
 
         @Override
         protected void onPreExecute(){
@@ -182,9 +200,21 @@ public class AngelBoardPostWrite extends AppCompatActivity
             String name = (String) params[0];
             String title = (String) params[1];
             String contents = (String) params[2];
+            int imgWidth = bitmap.getWidth();
+            int imgHeight = bitmap.getHeight();
+
+            Bitmap resized = null;
+
+            while (imgHeight > 118) {
+                resized = Bitmap.createScaledBitmap(bitmap, (imgWidth * 118) / imgHeight, 118, true);
+                imgHeight = resized.getHeight();
+                imgWidth = resized.getWidth();
+            }
+
+            BitMapToString(resized);
 
             String strUrl = "http://cir112.cafe24.com/insert_Post.php";
-            String postParams = "name=" + name + "&title=" + title + "&contents=" + contents;
+            String postParams = "name=" + name + "&title=" + title + "&contents=" + contents + "&img=" + temp;
 
             try {
                 URL url = new URL(strUrl);
@@ -228,6 +258,20 @@ public class AngelBoardPostWrite extends AppCompatActivity
                 Log.d(TAG, "InsertData : Error", e);
 
                 return new String("Error: " + e.getMessage());
+            }
+        }
+        public void BitMapToString(Bitmap bitmap) {
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);    //bitmap compress
+            byte[] arr = baos.toByteArray();
+            String image = Base64.encodeToString(arr, Base64.DEFAULT);
+
+
+            try {
+                temp = URLEncoder.encode(image, "utf-8");
+            } catch (Exception e) {
+                Log.e("exception", e.toString());
             }
         }
     }

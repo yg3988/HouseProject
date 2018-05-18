@@ -3,6 +3,7 @@ package com.example.jason.houseproject;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class AngelBoardPostView extends AppCompatActivity {
@@ -10,6 +11,7 @@ public class AngelBoardPostView extends AppCompatActivity {
     private TextView textViewNick;
     private TextView textViewHits;
     private TextView textViewContent;
+    private ImageView imageViewObject;
 
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -20,8 +22,11 @@ public class AngelBoardPostView extends AppCompatActivity {
         textViewNick = (TextView)findViewById(R.id.textViewNIck);
         textViewHits = (TextView)findViewById(R.id.textViewHits);
         textViewContent = (TextView)findViewById(R.id.textViewContent);
+        imageViewObject = (ImageView)findViewById(R.id.imageViewObject);
 
         Intent intent = getIntent();
+
+
 
         textViewSubject.setText(intent.getStringExtra("subject"));
         textViewNick.setText(intent.getStringExtra("nick"));

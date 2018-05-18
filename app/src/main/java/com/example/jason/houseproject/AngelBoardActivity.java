@@ -46,6 +46,7 @@ public class AngelBoardActivity extends AppCompatActivity
     private static final String TAG_HIT = "hits";
     private static final String TAG_DATE = "date";
     private static final String TAG_DESCRIPTION = "contents";
+    private static final String TAG_IMAGE = "img";
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -69,6 +70,7 @@ public class AngelBoardActivity extends AppCompatActivity
                 intent.putExtra("date",arrBoard.get(i).get(TAG_DATE));
                 intent.putExtra("hits",arrBoard.get(i).get(TAG_HIT));
                 intent.putExtra("contents",arrBoard.get(i).get(TAG_DESCRIPTION));
+                intent.putExtra("img",arrBoard.get(i).get(TAG_IMAGE));
                 startActivity(intent);
             }
         });
