@@ -109,7 +109,9 @@ public class AngelBoardActivity extends AppCompatActivity
                 String sub = c.getString(TAG_SUBJECT);
                 String nick = c.getString(TAG_NICK);
                 String hit = c.getString(TAG_HIT);
+                String img = c.getString(TAG_IMAGE);
                 String strDate = c.getString(TAG_DATE);
+
                 SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
                 Date date = df.parse(strDate);
                 strDate = new SimpleDateFormat("MM-dd").format(date);
@@ -123,6 +125,7 @@ public class AngelBoardActivity extends AppCompatActivity
                 boardItem.put(TAG_HIT,hit);
                 boardItem.put(TAG_DATE,strDate);
                 boardItem.put(TAG_DESCRIPTION, contents);
+                boardItem.put(TAG_IMAGE,img);
 
                 arrBoard.add(boardItem);
             }
