@@ -1,9 +1,15 @@
 package com.example.jason.houseproject;
 
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
+
+import java.util.ArrayList;
 
 //CostomListAdapter
 //@Author 문윤기
@@ -11,6 +17,9 @@ import android.widget.BaseAdapter;
 //참고 : http://i5on9i.blogspot.kr/
 
 public class SimpleListAdapter extends BaseAdapter{
+    private static final int ANGELBOARD = 1;
+    private static final int REVIEW_BOARD = 2;
+
     private String[] no;
     private String[] sub;
     private String[] nick;
@@ -20,6 +29,7 @@ public class SimpleListAdapter extends BaseAdapter{
 
     private String temp_data[] = new String[getCount()];
 
+    public SimpleListAdapter(){this.context = null;};
     public SimpleListAdapter(Context context){
         this.context = context;
     }
@@ -27,7 +37,6 @@ public class SimpleListAdapter extends BaseAdapter{
     public void setNo(String[] data){
         no=data;
     }
-
     public void setSub(String[] data){
         sub=data;
     }
@@ -47,25 +56,27 @@ public class SimpleListAdapter extends BaseAdapter{
     }
 
     @Override
-    public View getView(int position, View convertView,ViewGroup parent){
+    public View getView(int position, View convertView,ViewGroup parent) {
+
         BoardViewItem boardViewItem = null;
 
-        if(convertView!=null){
-            boardViewItem=(BoardViewItem)convertView;
-        }else{
+        if (convertView != null) {
+            boardViewItem = (BoardViewItem) convertView;
+        } else {
             boardViewItem = new BoardViewItem(context.getApplicationContext());
         }
 
-        try{
+        try {
             boardViewItem.setTextViewItemNo(no[position]);
             boardViewItem.setTextViewSub(sub[position]);
             boardViewItem.setTextViewNick(nick[position]);
             boardViewItem.setTextViewHit(hit[position]);
             boardViewItem.setTextViewDate(strDate[position]);
-        }catch(Exception e){
+        } catch (Exception e) {
             boardViewItem.setTextViewError("Error");
         }
         return boardViewItem;
+
     }
 
     public long getItemId(int postion){return postion;}

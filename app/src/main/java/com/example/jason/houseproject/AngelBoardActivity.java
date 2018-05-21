@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Locale;
 
 public class AngelBoardActivity extends AppCompatActivity {
-    private static final int MODE = 1;
+    private static final int ANGELBOARD = 1;
     private static final String TAG_RESULT = "result";
     private static final String TAG_BOARDNO = "no";
     private static final String TAG_SUBJECT = "sub";
@@ -30,7 +30,7 @@ public class AngelBoardActivity extends AppCompatActivity {
     private static final String TAG_DATE = "date";
     private static final String TAG_DESCRIPTION = "contents";
     private static final String TAG_IMAGE = "img";
-    static final String url = "http://cir112.cafe24.com/boardList.php";
+    static final String strURL = "http://cir112.cafe24.com/boardList.php";
 
     static public ListView listView;
     static public SimpleListAdapter simpleListAdapter;
@@ -53,9 +53,9 @@ public class AngelBoardActivity extends AppCompatActivity {
         listCnt = 0;
         listView.setAdapter(simpleListAdapter);
         arrBoard = new ArrayList<HashMap<String, String>>();
-        gd = new GetData(MODE);
+        gd = new GetData(ANGELBOARD);
 
-        gd.getData(url);
+        gd.getData(strURL);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

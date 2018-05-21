@@ -11,11 +11,11 @@ import android.widget.TextView;
 //참고 : http://answerofgod.tistory.com
 
 public class BoardViewItem extends LinearLayout{
-    TextView textViewItemNo;
-    TextView textViewSub;
-    TextView textViewNick;
-    TextView textViewHit;
-    TextView textViewDate;
+    private TextView textViewItemNo;
+    private TextView textViewSub;
+    private TextView textViewNick;
+    private TextView textViewHit;
+    private TextView textViewDate;
 
     public BoardViewItem(Context context) {
         super(context);
