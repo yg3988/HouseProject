@@ -1,6 +1,7 @@
 package com.example.jason.houseproject;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,6 +53,7 @@ public class SimpleListAdapter extends BaseAdapter{
 
     @Override
     public int getCount(){
+        Log.d("리스트 뷰 아이템 갯수",Integer.toString(AngelBoardActivity.listCnt));
         return AngelBoardActivity.listCnt;
     }
 

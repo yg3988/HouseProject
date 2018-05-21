@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -20,6 +21,8 @@ public class ReviewBoardFragment extends ListFragment {
 
     private String strLat;
     private String strLng;
+    static int listCnt = 0;
+    ListView listView;
     static FragmentListViewAdapter fragmentListViewAdapter;
     GetData gb;
 
@@ -47,11 +50,12 @@ public class ReviewBoardFragment extends ListFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         Log.d("프래그먼트","onCreateView 실행");
-
+        View view = inflater.inflate(R.layout.board_review,null);
+        listView = (ListView)view.findViewById(R.id.listViewReview);
         fragmentListViewAdapter = new FragmentListViewAdapter(getContext());
         setListAdapter(fragmentListViewAdapter);
 
-        gb = new GetData(REVIEW_BOARD,strLat,strLng);
+        gb = new GetData(REVIEW_BOARD,strLat,strLng);//DB에 좌표값을 보내서 해당 좌표에 해당하는 게시글만 뽑아옴
         gb.getData(strURL);
 
         return super.onCreateView(inflater,container,savedInstanceState);
@@ -62,7 +66,8 @@ public class ReviewBoardFragment extends ListFragment {
             JSONObject jsonObj = new JSONObject(myJson);
 
             JSONArray list = jsonObj.getJSONArray("result");
-            int listCnt = list.length();
+            listCnt = list.length();
+            Log.d("listCnt",Integer.toString(listCnt));
 
             String[] no = new String[listCnt];
             String[] sub = new String[listCnt];
@@ -78,8 +83,8 @@ public class ReviewBoardFragment extends ListFragment {
                 SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.KOREA);
                 Date date = df.parse(strDate[i]);
                 strDate[i] = new SimpleDateFormat("MM-dd",Locale.KOREA).format(date);
-                fragmentListViewAdapter.addItem(no[i],sub[i],strDate[i],nick[i]);
             }
+            fragmentListViewAdapter.addItem(no,sub,strDate,nick);
         } catch (Exception e) {
             e.printStackTrace();
         }

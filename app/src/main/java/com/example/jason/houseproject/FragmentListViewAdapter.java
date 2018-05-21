@@ -18,14 +18,16 @@ public class FragmentListViewAdapter extends BaseAdapter{
         Log.d("ListViewAdapter","잘되나");
     }
 
-    String itemNo;
-    String itemSub;
-    String nick;
-    String strDate;
+    String[] itemNo;
+    String[] itemSub;
+    String[] nick;
+    String[] strDate;
+    private String temp_data[] = new String[getCount()];
 
     @Override
     public int getCount(){
-        return reviewBoardItemsList.size();
+        Log.d("리스트 뷰 아이템 갯수",Integer.toString(ReviewBoardFragment.listCnt));
+        return ReviewBoardFragment.listCnt;
     }
 
     @Override
@@ -40,12 +42,6 @@ public class FragmentListViewAdapter extends BaseAdapter{
         }
 
 
-
-        item.setStrNo(itemNo);
-        item.setStrSub(itemSub);
-        item.setStrDate(strDate);
-        item.setStrNick(nick);
-
         reviewBoardItemsList.add(item);
 
         return convertView;
@@ -59,10 +55,10 @@ public class FragmentListViewAdapter extends BaseAdapter{
     // 지정한 위치(position)에 있는 데이터 리턴 : 필수 구현
     @Override
     public Object getItem(int position) {
-        return reviewBoardItemsList.get(position) ;
+        return temp_data[(position)];
     }
 
-    public void addItem(String no, String sub, String date, String nick) {
+    public void addItem(String[] no, String[] sub, String[] date, String[] nick) {
         itemNo = no;
         itemSub = sub;
         strDate = date;

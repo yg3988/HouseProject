@@ -49,6 +49,7 @@ public class GetData {
             @Override
             protected String doInBackground (String... params)
             {
+                Log.d("GetData LatLng",lat+" "+lng);
                 String strUrl = params[0];
                 String postParams = "lat=" + lat + "&lng=" + lng;
 
@@ -111,6 +112,7 @@ public class GetData {
                         AngelBoardActivity.show(myJson);//AngelBoardActivity 인스턴스의 show 메소드 호출
                         break;
                     case REVIEW_BOARD:
+                        Log.d("GetData Json",myJson);
                         ReviewBoardFragment.show(myJson);
                         break;
                     case MAP_MARKER:
