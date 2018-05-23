@@ -58,6 +58,8 @@ public class AngelBoardPostWrite extends AppCompatActivity
 
         toolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         editTextSub = (EditText)findViewById(R.id.editTextSubject);
         editTextCon = (EditText)findViewById(R.id.editTextContents);
@@ -97,31 +99,36 @@ public class AngelBoardPostWrite extends AppCompatActivity
         getMenuInflater().inflate(R.menu.post_write_menu, menu);
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home: //toolbar의 back키 눌렀을 때 동작
+                Intent intentParent = new Intent(getApplicationContext(), AngelBoardActivity.class);
+                startActivity(intentParent);
+                finish();
+                return true;
+            case R.id.newPost:
+                postElement[0] = "ADMIN";
+                postElement[1] = editTextSub.getText().toString();
+                postElement[2] = editTextCon.getText().toString();
 
-        int id = item.getItemId();
+                InsertPost task = new InsertPost();
+                task.execute(postElement);
 
-        if( id == R.id.newPost ){
-            postElement[0] = "ADMIN";
-            postElement[1] = editTextSub.getText().toString();
-            postElement[2] = editTextCon.getText().toString();
+                Intent intentWrote = new Intent(getApplicationContext(), AngelBoardActivity.class);
+                startActivity(intentWrote);
+                finish();
+                return true;
+            case R.id.openGallery:
+                Intent intentGallery = new Intent(Intent.ACTION_PICK);
 
-            InsertPost task = new InsertPost();
-            task.execute(postElement);
+                intentGallery.setType(android.provider.MediaStore.Images.Media.CONTENT_TYPE);
+                intentGallery.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                intentGallery.setType("image/*");
 
-            Intent intent = new Intent(getApplicationContext(), AngelBoardActivity.class);
-            startActivity(intent);
-            finish();
-            return true;
-        }
-        if(id==R.id.openGallery){
-            Intent intent = new Intent(Intent.ACTION_PICK);
-            intent.setType(android.provider.MediaStore.Images.Media.CONTENT_TYPE);
-            intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            intent.setType("image/*");
-            startActivityForResult(intent, REQ_CODE_SELECT_IMAGE);
-            return true;
+                startActivityForResult(intentGallery, REQ_CODE_SELECT_IMAGE);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }

@@ -54,7 +54,6 @@ import static com.google.android.gms.maps.CameraUpdateFactory.*;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,GoogleMap.OnInfoWindowClickListener {
     final int MY_PERMISSIONS_ACCESS_COARSE_LOCATION = 1;
     private GoogleMap mMap;
-    static final LatLng JINJU = new LatLng(35.180291, 128.107830);
 
     double myLocationLatitude = .0d;
     double myLocationLongitude = .0d;
@@ -68,6 +67,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final String TAG_NAME = "name";
     private static final String TAG_LATITUDE = "latitude";
     private static final String TAG_LONGITUDE = "longitude";
+    private static final String STRING_URI = "http://cir112.cafe24.com/mapMarkerInfo.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -192,15 +192,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mMap.moveCamera(newLatLngZoom(new LatLng(35.154265,128.098157), 16));
 
-        getData("http://cir112.cafe24.com/mapMarkerInfo.php");
-
-        mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(35.180291, 128.107830))
-                .title("JinJu Cityhall")
-                .snippet("Population: 8,174 million (2011)").draggable(true));
-
-        mMap.addMarker(new MarkerOptions()
-                .position(JINJU));
+        getData(STRING_URI,1);
 
         mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(35.154265, 128.098157))
@@ -251,11 +243,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 dialog.show();
             }
         });
+
+        /*mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                getData(STRING_URI,2);
+                return false;
+            }
+        });*/
     }
 
     @Override
-    public void onInfoWindowClick(Marker marker) {
-        Intent intent = new Intent(getApplicationContext(), AngelBoardActivity.class);
+    public void onInfoWindowClick(Marker marker) {//마커 인포창 클릭 이벤트
+        LatLng markerLocation = marker.getPosition();//선택 마커 위치
+
+        Intent intent = new Intent(getApplicationContext(), ReviewBoardActivity.class);
+        intent.putExtra("latitude",Double.toString(markerLocation.latitude));
+        intent.putExtra("longitude", Double.toString(markerLocation.longitude));
+
         startActivity(intent);
     }
 
@@ -362,7 +367,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     //DB에서 자취방 정보를 가져와 마커 출력
-    protected void showList()
+    protected void showMarkerList()
     {
         try
         {
@@ -378,14 +383,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 LatLng latLng = new LatLng(lat,lng);
 
-                mMap.addMarker(new MarkerOptions().position(latLng).title(name).snippet("이다음엔 어떻게 만들어야 잘 만들었다고 소문이 날까? "));
+                mMap.addMarker(new MarkerOptions().position(latLng).title(name).snippet("게시판 열기"));
             }
         }catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void getData(String url){
+    public void getData(String url,final int mode){
         class GetDataJson extends AsyncTask<String, Void, String>
         {
             @Override
@@ -418,7 +423,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             protected void onPostExecute(String result)
             {
                 myJson = result;
-                showList();
+                switch(mode){
+                    case 1:
+                        showMarkerList();
+                    case 2:
+                        //showRoomInfo();
+                }
+
             }
         }
         GetDataJson g = new GetDataJson();

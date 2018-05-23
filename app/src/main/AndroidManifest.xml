@@ -58,8 +58,9 @@
         <activity android:name=".AngelBoardActivity"></activity>
         <activity android:name=".AngelBoardPostView"></activity>
         <activity android:name=".AngelBoardPostWrite"></activity>
-        <activity android:name=".RegisterActivity" />
+        <activity android:name=".RegisterActivity"></activity>
         <activity android:name=".MainActivity"></activity>
+        <activity android:name=".ReviewBoardActivity"></activity>
     </application>
 
 </manifest>
