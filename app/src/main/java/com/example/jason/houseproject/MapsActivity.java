@@ -227,7 +227,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         InsertMaker insertMaker = new InsertMaker();
                         insertMaker.execute(strMyLocationLatLng);
 
-                        mMap.addMarker(new MarkerOptions().position(myLocationLatLng).title(buildName).snippet("이다음엔 어떻게 만들어야 잘 만들었다고 소문이 날까? "));
+                        mMap.addMarker(new MarkerOptions().position(myLocationLatLng).title(buildName).snippet("게시판 열기"));
                     }
                 });
                 adBuilder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
