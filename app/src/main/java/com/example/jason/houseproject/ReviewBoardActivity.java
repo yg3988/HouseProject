@@ -5,11 +5,14 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -39,8 +42,9 @@ public class ReviewBoardActivity extends AppCompatActivity{
     private Toolbar toolbar;
     private String lat;
     private String lng;
+    private String build;
     private ListView listView;
-
+    private TextView textViewBuildTitle;
     ArrayList<HashMap<String,String>> arrBoard;
     JSONArray list=null;
     String myJson;
@@ -48,13 +52,15 @@ public class ReviewBoardActivity extends AppCompatActivity{
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_review_board);
-
+        textViewBuildTitle = (TextView)findViewById(R.id.textViewBuildingName);
+        Intent intent = getIntent();
+        build = intent.getStringExtra("building");
         toolbar = (Toolbar) findViewById(R.id.toolbarReviewBoard);
+        textViewBuildTitle.setText(build);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        Intent intent = getIntent();
 
         lat = intent.getStringExtra("latitude");
         lng = intent.getStringExtra("longitude");
@@ -69,15 +75,34 @@ public class ReviewBoardActivity extends AppCompatActivity{
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intent = new Intent(getApplicationContext(), ReviewBoardPostView.class);
+                intent.putExtra("build",build);
                 intent.putExtra("subject", arrBoard.get(i).get(TAG_SUBJECT));
-                intent.putExtra("nick",arrBoard.get(i).get(TAG_NICK));
-                intent.putExtra("date",arrBoard.get(i).get(TAG_DATE));
                 //intent.putExtra("hits",arrBoard.get(i).get(TAG_HIT));
                 intent.putExtra("contents",arrBoard.get(i).get(TAG_DESCRIPTION));
                 //intent.putExtra("img",arrBoard.get(i).get(TAG_IMAGE));
                 startActivity(intent);
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home: //toolbar의 back키 눌렀을 때 동작
+                finish();
+                return true;
+            case R.id.newPost:
+                Intent intentWrite = new Intent(getApplicationContext(), AngelBoardPostWrite.class);
+                startActivity(intentWrite);
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     protected void showList()
