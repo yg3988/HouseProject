@@ -77,9 +77,7 @@ public class ReviewBoardActivity extends AppCompatActivity{
                 Intent intent = new Intent(getApplicationContext(), ReviewBoardPostView.class);
                 intent.putExtra("build",build);
                 intent.putExtra("subject", arrBoard.get(i).get(TAG_SUBJECT));
-                //intent.putExtra("hits",arrBoard.get(i).get(TAG_HIT));
                 intent.putExtra("contents",arrBoard.get(i).get(TAG_DESCRIPTION));
-                //intent.putExtra("img",arrBoard.get(i).get(TAG_IMAGE));
                 startActivity(intent);
             }
         });
@@ -118,8 +116,6 @@ public class ReviewBoardActivity extends AppCompatActivity{
                 String no = c.getString(TAG_BOARDNO);
                 String sub = c.getString(TAG_SUBJECT);
                 String nick = c.getString(TAG_NICK);
-                //String hit = c.getString(TAG_HIT);
-                //String img = c.getString(TAG_IMAGE);
                 String strDate = c.getString(TAG_DATE);
 
                 SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
@@ -132,10 +128,8 @@ public class ReviewBoardActivity extends AppCompatActivity{
                 boardItem.put(TAG_BOARDNO,no);
                 boardItem.put(TAG_SUBJECT,sub);
                 boardItem.put(TAG_NICK,nick);
-                //boardItem.put(TAG_HIT,hit);
                 boardItem.put(TAG_DATE,strDate);
                 boardItem.put(TAG_DESCRIPTION, contents);
-                //boardItem.put(TAG_IMAGE,img);
 
                 arrBoard.add(boardItem);
             }
