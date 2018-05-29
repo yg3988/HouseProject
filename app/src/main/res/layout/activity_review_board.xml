@@ -17,12 +17,15 @@
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
         <TextView
+            android:id="@+id/textViewBuildingName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="left"
             android:text="후기게시판"
             android:textColor="#FFFFFF"
             android:textSize="20sp"
-            android:layout_gravity="center"/>
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+
     </android.support.v7.widget.Toolbar>
 
     <ListView
