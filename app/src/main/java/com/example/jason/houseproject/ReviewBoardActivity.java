@@ -30,14 +30,24 @@ import java.util.HashMap;
 
 public class ReviewBoardActivity extends AppCompatActivity{
     private static final String TAG_RESULT = "result";
-    private static final String TAG_BOARDNO = "no";
     private static final String TAG_SUBJECT = "sub";
     private static final String TAG_NICK = "nick";
     private static final String TAG_HIT = "hits";
     private static final String TAG_DATE = "date";
     private static final String TAG_DESCRIPTION = "content";
-    private static final String TAG_IMAGE = "img";
-    private static final String STRING_URI = "http://cir112.cafe24.com/reviewBoardList.php";
+    private static final String TAG_MONTHLY = "monthly";
+    private static final String TAG_DEPOSIT="deposit";
+    private static final String TAG_MAINTENANCE = "maintenance";
+    private static final String[] TAG_OPTION = {    "bed",
+                                                        "desk",
+                                                        "closet",
+                                                        "refrigerator",
+                                                        "airconditioner",
+                                                        "microwave",
+                                                        "internet",
+                                                        "water",
+                                                        "tv"};
+    private static final String STRING_URI = "http://cir112.cafe24.com/reviewBoardList2.php";
 
     private Toolbar toolbar;
     private String lat;
@@ -76,9 +86,17 @@ public class ReviewBoardActivity extends AppCompatActivity{
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intent = new Intent(getApplicationContext(), ReviewBoardPostView.class);
                 intent.putExtra("build",build);
-                intent.putExtra("subject", arrBoard.get(i).get(TAG_SUBJECT));
+                intent.putExtra("lat",lat);
+                intent.putExtra("lng",lng);
                 intent.putExtra("contents",arrBoard.get(i).get(TAG_DESCRIPTION));
+                intent.putExtra("monthly",arrBoard.get(i).get(TAG_MONTHLY));
+                intent.putExtra("deposit",arrBoard.get(i).get(TAG_DEPOSIT));
+                intent.putExtra("maintenance", arrBoard.get(i).get(TAG_MAINTENANCE));
+                for(int j = 0; j<TAG_OPTION.length;j++){
+                    intent.putExtra(Integer.toString(j),arrBoard.get(i).get(TAG_OPTION[j]));
+                }
                 startActivity(intent);
+                finish();
             }
         });
     }
@@ -95,7 +113,10 @@ public class ReviewBoardActivity extends AppCompatActivity{
                 finish();
                 return true;
             case R.id.newPost:
-                Intent intentWrite = new Intent(getApplicationContext(), AngelBoardPostWrite.class);
+                Intent intentWrite = new Intent(getApplicationContext(), ReviewBoardPostWrite.class);
+                intentWrite.putExtra("building",build);
+                intentWrite.putExtra("lat",lat);
+                intentWrite.putExtra("lng",lng);
                 startActivity(intentWrite);
                 finish();
                 return true;
@@ -113,23 +134,31 @@ public class ReviewBoardActivity extends AppCompatActivity{
             for(int i=0;i<list.length();i++)
             {
                 JSONObject c = list.getJSONObject(i);
-                String no = c.getString(TAG_BOARDNO);
                 String sub = c.getString(TAG_SUBJECT);
                 String nick = c.getString(TAG_NICK);
-                String strDate = c.getString(TAG_DATE);
+                String contents = c.getString(TAG_DESCRIPTION);
+                String monthly = c.getString(TAG_MONTHLY);
+                String deposit = c.getString(TAG_DEPOSIT);
+                String maintenance = c.getString(TAG_MAINTENANCE);
+                String[] option = new String[TAG_OPTION.length];
+                for(int j = 0; j<TAG_OPTION.length;j++)  option[j] = c.getString(TAG_OPTION[j]);
 
+
+                String strDate = c.getString(TAG_DATE);
                 SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
                 Date date = df.parse(strDate);
                 strDate = new SimpleDateFormat("MM-dd").format(date);
-                String contents = c.getString(TAG_DESCRIPTION);
 
                 HashMap<String,String> boardItem = new HashMap<String, String>();
 
-                boardItem.put(TAG_BOARDNO,no);
                 boardItem.put(TAG_SUBJECT,sub);
                 boardItem.put(TAG_NICK,nick);
                 boardItem.put(TAG_DATE,strDate);
                 boardItem.put(TAG_DESCRIPTION, contents);
+                boardItem.put(TAG_MONTHLY,monthly);
+                boardItem.put(TAG_DEPOSIT,deposit);
+                boardItem.put(TAG_MAINTENANCE,maintenance);
+                for(int j = 0; j<TAG_OPTION.length;j++) boardItem.put(TAG_OPTION[j],option[j]);
 
                 arrBoard.add(boardItem);
             }
@@ -138,9 +167,9 @@ public class ReviewBoardActivity extends AppCompatActivity{
                     (
                             ReviewBoardActivity.this,
                             arrBoard,
-                            R.layout.board_listview_item,
-                            new String[]{TAG_BOARDNO,TAG_SUBJECT,TAG_NICK,TAG_HIT,TAG_DATE},
-                            new int[]{R.id.item_no, R.id.sub, R.id.nick,R.id.hit,R.id.date}
+                            R.layout.review_listview_item,
+                            new String[]{TAG_SUBJECT,TAG_NICK,TAG_DATE},
+                            new int[]{ R.id.sub, R.id.nick,R.id.date}
                     );
 
             listView.setAdapter(adapter);

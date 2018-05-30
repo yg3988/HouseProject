@@ -14,11 +14,13 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.CAMERA"/>
-
+    <!--
+    android:label
+    -->
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="시험용"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar">
@@ -53,14 +55,14 @@
             </intent-filter>
         </activity>
 
-
-
         <activity android:name=".AngelBoardActivity"></activity>
         <activity android:name=".AngelBoardPostView"></activity>
         <activity android:name=".AngelBoardPostWrite"></activity>
         <activity android:name=".RegisterActivity"></activity>
         <activity android:name=".MainActivity"></activity>
         <activity android:name=".ReviewBoardActivity"></activity>
+        <activity android:name=".ReviewBoardPostView"></activity>
+        <activity android:name=".ReviewBoardPostWrite"></activity>
     </application>
 
 </manifest>

@@ -52,7 +52,7 @@ import static android.location.LocationManager.NETWORK_PROVIDER;
 import static com.google.android.gms.maps.CameraUpdateFactory.*;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,GoogleMap.OnInfoWindowClickListener {
-    final int MY_PERMISSIONS_ACCESS_COARSE_LOCATION = 1;
+    final int MY_PERMISSIONS_ACCESS_COARSE_LOCATION = 1001;
     private GoogleMap mMap;
 
     double myLocationLatitude = .0d;
@@ -147,7 +147,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -162,33 +161,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         final int MY_PERMISSIONS_ACCESS_COARSE_LOCATION = 1;
         mMap = googleMap;
 
-        if (ContextCompat.checkSelfPermission(MapsActivity.this,
-                Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(MapsActivity.this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION)) {
-
-                // Show an expanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-
-            } else {
-
-                // No explanation needed, we can request the permission.
-
-                ActivityCompat.requestPermissions(MapsActivity.this,
-                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                        MY_PERMISSIONS_ACCESS_COARSE_LOCATION);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
-        }
-
-        mMap.setMyLocationEnabled(true);
+        if (ContextCompat.checkSelfPermission(MapsActivity.this,Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED)
+            mMap.setMyLocationEnabled(true);
 
         mMap.moveCamera(newLatLngZoom(new LatLng(35.154265,128.098157), 16));
 
@@ -244,13 +218,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        /*mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                getData(STRING_URI,2);
+                LatLng markerLocation = marker.getPosition();
+
+                Toast.makeText(MapsActivity.this, "Lat : "+Double.toString(markerLocation.latitude) + "\nLng :"+Double.toString(markerLocation.longitude), Toast.LENGTH_SHORT).show();
                 return false;
             }
-        });*/
+        });
     }
 
     @Override
@@ -258,6 +234,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng markerLocation = marker.getPosition();//선택 마커 위치
 
         Intent intent = new Intent(getApplicationContext(), ReviewBoardActivity.class);
+        intent.putExtra("building",marker.getTitle());
         intent.putExtra("latitude",Double.toString(markerLocation.latitude));
         intent.putExtra("longitude", Double.toString(markerLocation.longitude));
 
