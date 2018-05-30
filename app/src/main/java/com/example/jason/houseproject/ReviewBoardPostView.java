@@ -1,6 +1,7 @@
 package com.example.jason.houseproject;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -31,13 +32,17 @@ public class ReviewBoardPostView extends AppCompatActivity{
 
     String lat;
     String lng;
+    String no;
     boolean[] isOption;
 
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.board_review_post_view);
         isOption = new boolean[9];
+
         Intent intent = getIntent();
+
+        no=intent.getStringExtra("no");
 
         toolbar = (Toolbar)findViewById(R.id.toolbarReviewPostView);
         textViewBoardTitle=(TextView)findViewById(R.id.textViewBoardTitle);
@@ -97,6 +102,13 @@ public class ReviewBoardPostView extends AppCompatActivity{
             case android.R.id.home: //toolbar의 back키 눌렀을 때 동작
                 finish();
                 return true;
+            case R.id.delete_post:
+                SharedPreferences sp = getSharedPreferences("loginInfo", MODE_PRIVATE);
+                String id = sp.getString("ID","");
+
+                PostDelete pd = new PostDelete();
+                pd.execute("delete_review_post.php", no, id);
+                finish();
         }
         return super.onOptionsItemSelected(item);
     }

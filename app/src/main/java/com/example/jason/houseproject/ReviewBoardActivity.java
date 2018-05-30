@@ -85,6 +85,8 @@ public class ReviewBoardActivity extends AppCompatActivity{
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intent = new Intent(getApplicationContext(), ReviewBoardPostView.class);
+
+                intent.putExtra("no", arrBoard.get(i).get("no"));
                 intent.putExtra("build",build);
                 intent.putExtra("lat",lat);
                 intent.putExtra("lng",lng);
@@ -134,6 +136,7 @@ public class ReviewBoardActivity extends AppCompatActivity{
             for(int i=0;i<list.length();i++)
             {
                 JSONObject c = list.getJSONObject(i);
+                String no = c.getString("no");
                 String sub = c.getString(TAG_SUBJECT);
                 String nick = c.getString(TAG_NICK);
                 String contents = c.getString(TAG_DESCRIPTION);
@@ -150,7 +153,7 @@ public class ReviewBoardActivity extends AppCompatActivity{
                 strDate = new SimpleDateFormat("MM-dd").format(date);
 
                 HashMap<String,String> boardItem = new HashMap<String, String>();
-
+                boardItem.put("no",no);
                 boardItem.put(TAG_SUBJECT,sub);
                 boardItem.put(TAG_NICK,nick);
                 boardItem.put(TAG_DATE,strDate);

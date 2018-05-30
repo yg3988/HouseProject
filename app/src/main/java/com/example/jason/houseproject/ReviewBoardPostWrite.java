@@ -2,6 +2,7 @@ package com.example.jason.houseproject;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -115,16 +116,15 @@ public class ReviewBoardPostWrite extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result){
             super.onPostExecute(result);
-
             progressDialog.dismiss();
-            Toast.makeText(ReviewBoardPostWrite.this, result, Toast.LENGTH_SHORT).show();
             Log.d(TAG,"POST response - "+result);
         }
 
         @Override
         protected String doInBackground(String... params) {
+            SharedPreferences sp = getSharedPreferences("loginInfo", MODE_PRIVATE);
             String strUrl = "http://cir112.cafe24.com/insert_review_post.php";
-            String postParams = "build_name=" + building + "&lat=" + lat + "&lng=" + lng + "&title=" +editTextTitle.getText().toString()+ "&contents=" +editTextContents.getText().toString()+ "&monthly=" +editTextMonthly.getText().toString()+ "&deposit=" +editTextDeposit.getText().toString()+ "&maintenance=" +editTextMaintenance.getText().toString()+ "&bed=" +isOption[0]+ "&desk=" +isOption[1]+ "&closet=" +isOption[2]+ "&refri=" +isOption[3]+ "&aircon=" +isOption[4]+ "&micro=" +isOption[5]+ "&net=" +isOption[6]+ "&water=" +isOption[7]+ "&tv=" +isOption[8];
+            String postParams = "build_name=" + building + "&lat=" + lat + "&lng=" + lng + "&title=" +editTextTitle.getText().toString()+"&id="+sp.getString("ID","root")+"&contents=" +editTextContents.getText().toString()+ "&monthly=" +editTextMonthly.getText().toString()+ "&deposit=" +editTextDeposit.getText().toString()+ "&maintenance=" +editTextMaintenance.getText().toString()+ "&bed=" +isOption[0]+ "&desk=" +isOption[1]+ "&closet=" +isOption[2]+ "&refri=" +isOption[3]+ "&aircon=" +isOption[4]+ "&micro=" +isOption[5]+ "&net=" +isOption[6]+ "&water=" +isOption[7]+ "&tv=" +isOption[8];
 
             try {
                 URL url = new URL(strUrl);

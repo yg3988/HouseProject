@@ -62,6 +62,7 @@ public class AngelBoardActivity extends AppCompatActivity
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intent = new Intent(getApplicationContext(), AngelBoardPostView.class);
+                intent.putExtra("no",arrBoard.get(i).get(TAG_BOARDNO));
                 intent.putExtra("subject", arrBoard.get(i).get(TAG_SUBJECT));
                 intent.putExtra("nick",arrBoard.get(i).get(TAG_NICK));
                 intent.putExtra("date",arrBoard.get(i).get(TAG_DATE));
@@ -69,6 +70,7 @@ public class AngelBoardActivity extends AppCompatActivity
                 intent.putExtra("contents",arrBoard.get(i).get(TAG_DESCRIPTION));
                 intent.putExtra("img",arrBoard.get(i).get(TAG_IMAGE));
                 startActivity(intent);
+                finish();
             }
         });
     }

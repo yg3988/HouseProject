@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/first"
+        android:id="@+id/delete_post"
         android:title="글 삭제"
         app:showAsAction="never"/>
 </menu>

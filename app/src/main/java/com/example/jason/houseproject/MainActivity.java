@@ -2,6 +2,7 @@ package com.example.jason.houseproject;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
@@ -85,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
     private void permissionInit(){
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 

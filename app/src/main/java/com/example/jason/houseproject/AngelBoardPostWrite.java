@@ -3,6 +3,7 @@ package com.example.jason.houseproject;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -198,12 +199,12 @@ public class AngelBoardPostWrite extends AppCompatActivity
             super.onPostExecute(result);
 
             progressDialog.dismiss();
-            Toast.makeText(AngelBoardPostWrite.this, result, Toast.LENGTH_SHORT).show();
             Log.d(TAG,"POST response - "+result);
         }
 
         @Override
         protected String doInBackground(String... params) {
+            SharedPreferences sp = getSharedPreferences("loginInfo",MODE_PRIVATE);
             String name = (String) params[0];
             String title = (String) params[1];
             String contents = (String) params[2];
@@ -221,7 +222,7 @@ public class AngelBoardPostWrite extends AppCompatActivity
             BitMapToString(resized);
 
             String strUrl = "http://cir112.cafe24.com/insert_Post.php";
-            String postParams = "name=" + name + "&title=" + title + "&contents=" + contents + "&img=" + temp;
+            String postParams = "name=" + sp.getString("ID",name) + "&title=" + title + "&contents=" + contents + "&img=" + temp;
 
             try {
                 URL url = new URL(strUrl);
