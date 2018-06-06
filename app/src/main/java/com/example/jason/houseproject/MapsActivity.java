@@ -78,8 +78,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        final TextView textViewLog = (TextView)findViewById(R.id.textViewLog);
-
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
         boolean isGPSEnabled = locationManager.isProviderEnabled(GPS_PROVIDER);
@@ -91,15 +89,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 myLocationLatitude = location.getLatitude();
                 myLocationLongitude = location.getLongitude();
                 myLocationLatLng = new LatLng(myLocationLatitude,myLocationLongitude);
-
-                textViewLog.setText("지역변수 lat : " + Double.toString(myLocationLatitude) + ",   lon : " +Double.toString(myLocationLongitude));
             }
 
-            public void onStatusChanged(String provider, int status, Bundle extras) { textViewLog.setText("onStatusChanged"); }
+            public void onStatusChanged(String provider, int status, Bundle extras) { }
 
-            public void onProviderEnabled(String provider) {textViewLog.setText("onProviderEnabled"); }
+            public void onProviderEnabled(String provider) { }
 
-            public void onProviderDisabled(String provider) { textViewLog.setText("onProviderDisabled"); }
+            public void onProviderDisabled(String provider) { }
         };
 
         // Register the listener with the Location Manager to receive location updates
@@ -215,16 +211,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 dialog.setCanceledOnTouchOutside(false);
                 dialog.show();
-            }
-        });
-
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                LatLng markerLocation = marker.getPosition();
-
-                Toast.makeText(MapsActivity.this, "Lat : "+Double.toString(markerLocation.latitude) + "\nLng :"+Double.toString(markerLocation.longitude), Toast.LENGTH_SHORT).show();
-                return false;
             }
         });
     }

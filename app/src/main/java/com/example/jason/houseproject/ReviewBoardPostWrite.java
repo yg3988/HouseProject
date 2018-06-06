@@ -83,8 +83,6 @@ public class ReviewBoardPostWrite extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case android.R.id.home: //toolbar의 back키 눌렀을 때 동작
-                Intent intentParent = new Intent(getApplicationContext(), ReviewBoardActivity.class);
-                startActivity(intentParent);
                 finish();
                 return true;
             case R.id.newPost:
@@ -94,8 +92,6 @@ public class ReviewBoardPostWrite extends AppCompatActivity {
                 }
                 ReviewBoardPostWrite.InsertPost task = new ReviewBoardPostWrite.InsertPost();
                 task.execute();
-                Intent intentWrote = new Intent(getApplicationContext(), ReviewBoardActivity.class);
-                startActivity(intentWrote);
                 finish();
                 return true;
         }

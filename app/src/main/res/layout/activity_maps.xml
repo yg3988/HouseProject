@@ -5,12 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <fragment
-        xmlns:map="http://schemas.android.com/apk/res-auto"
+    <fragment xmlns:map="http://schemas.android.com/apk/res-auto"
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="match_parent"
         tools:context="exampl.gimseongjae.houseproject.MapsActivity"
 
 
@@ -28,18 +27,5 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true" />
 
-
-    <TextView
-        android:id="@+id/textViewLog"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="230dp" />
-
-    <android.support.v4.view.ViewPager
-        android:layout_below="@+id/map"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"></android.support.v4.view.ViewPager>
 
 </RelativeLayout>
