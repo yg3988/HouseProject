@@ -3,6 +3,7 @@ package com.example.jason.houseproject;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -58,6 +59,8 @@ public class AngelBoardPostWrite extends AppCompatActivity
 
         toolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         editTextSub = (EditText)findViewById(R.id.editTextSubject);
         editTextCon = (EditText)findViewById(R.id.editTextContents);
@@ -97,31 +100,36 @@ public class AngelBoardPostWrite extends AppCompatActivity
         getMenuInflater().inflate(R.menu.post_write_menu, menu);
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home: //toolbar의 back키 눌렀을 때 동작
+                Intent intentParent = new Intent(getApplicationContext(), AngelBoardActivity.class);
+                startActivity(intentParent);
+                finish();
+                return true;
+            case R.id.newPost:
+                postElement[0] = "ADMIN";
+                postElement[1] = editTextSub.getText().toString();
+                postElement[2] = editTextCon.getText().toString();
 
-        int id = item.getItemId();
+                InsertPost task = new InsertPost();
+                task.execute(postElement);
 
-        if( id == R.id.newPost ){
-            postElement[0] = "ADMIN";
-            postElement[1] = editTextSub.getText().toString();
-            postElement[2] = editTextCon.getText().toString();
+                Intent intentWrote = new Intent(getApplicationContext(), AngelBoardActivity.class);
+                startActivity(intentWrote);
+                finish();
+                return true;
+            case R.id.openGallery:
+                Intent intentGallery = new Intent(Intent.ACTION_PICK);
 
-            InsertPost task = new InsertPost();
-            task.execute(postElement);
+                intentGallery.setType(android.provider.MediaStore.Images.Media.CONTENT_TYPE);
+                intentGallery.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                intentGallery.setType("image/*");
 
-            Intent intent = new Intent(getApplicationContext(), AngelBoardActivity.class);
-            startActivity(intent);
-            finish();
-            return true;
-        }
-        if(id==R.id.openGallery){
-            Intent intent = new Intent(Intent.ACTION_PICK);
-            intent.setType(android.provider.MediaStore.Images.Media.CONTENT_TYPE);
-            intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            intent.setType("image/*");
-            startActivityForResult(intent, REQ_CODE_SELECT_IMAGE);
-            return true;
+                startActivityForResult(intentGallery, REQ_CODE_SELECT_IMAGE);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -191,12 +199,12 @@ public class AngelBoardPostWrite extends AppCompatActivity
             super.onPostExecute(result);
 
             progressDialog.dismiss();
-            Toast.makeText(AngelBoardPostWrite.this, result, Toast.LENGTH_SHORT).show();
             Log.d(TAG,"POST response - "+result);
         }
 
         @Override
         protected String doInBackground(String... params) {
+            SharedPreferences sp = getSharedPreferences("loginInfo",MODE_PRIVATE);
             String name = (String) params[0];
             String title = (String) params[1];
             String contents = (String) params[2];
@@ -214,7 +222,7 @@ public class AngelBoardPostWrite extends AppCompatActivity
             BitMapToString(resized);
 
             String strUrl = "http://cir112.cafe24.com/insert_Post.php";
-            String postParams = "name=" + name + "&title=" + title + "&contents=" + contents + "&img=" + temp;
+            String postParams = "name=" + sp.getString("ID",name) + "&title=" + title + "&contents=" + contents + "&img=" + temp;
 
             try {
                 URL url = new URL(strUrl);

@@ -6,6 +6,24 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbarAngelPostView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#e4ebf7"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme">
+
+        <TextView
+            android:id="@+id/textViewBoardTitle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="left"
+            android:text="후기게시판"
+            android:textSize="20sp" />
+
+    </android.support.v7.widget.Toolbar>
+
     <TextView
         android:id="@+id/textViewSub"
         android:layout_width="match_parent"

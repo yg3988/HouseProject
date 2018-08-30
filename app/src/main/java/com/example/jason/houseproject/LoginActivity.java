@@ -1,6 +1,8 @@
 package com.example.jason.houseproject;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -48,7 +50,7 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String userID = idText.getText().toString();
+                final String userID = idText.getText().toString();
                 String userPassword = passwordText.getText().toString();
 
                 Response.Listener<String> responseListener = new Response.Listener<String>() {
@@ -61,6 +63,11 @@ public class LoginActivity extends AppCompatActivity {
 
                             //로그인 성공 시
                             if(success){
+                                SharedPreferences successedLoginInfo = getSharedPreferences("loginInfo", MODE_PRIVATE);
+                                SharedPreferences.Editor editor = successedLoginInfo.edit();
+                                editor.putString("ID",userID);
+                                editor.commit();
+
                                 AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                                 dialog = builder.setMessage("로그인 성공").setPositiveButton("확인", null).create();
                                 dialog.show();

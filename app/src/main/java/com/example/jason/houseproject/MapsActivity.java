@@ -1,29 +1,32 @@
 package com.example.jason.houseproject;
 
 import android.Manifest;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListAdapter;
+import android.widget.SimpleAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -40,29 +43,31 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
 
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
 import static com.google.android.gms.maps.CameraUpdateFactory.*;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,GoogleMap.OnInfoWindowClickListener {
-    final int MY_PERMISSIONS_ACCESS_COARSE_LOCATION = 1;
-    private static GoogleMap mMap;
-    static final LatLng JINJU = new LatLng(35.180291, 128.107830);
+    final int MY_PERMISSIONS_ACCESS_COARSE_LOCATION = 1001;
+    private GoogleMap mMap;
 
     double myLocationLatitude = .0d;
     double myLocationLongitude = .0d;
 
     LatLng myLocationLatLng;
 
-    static JSONArray list=null;
+    JSONArray list=null;
+    String myJson;
 
     private static final String TAG_RESULT = "result";
     private static final String TAG_NAME = "name";
     private static final String TAG_LATITUDE = "latitude";
     private static final String TAG_LONGITUDE = "longitude";
-    private static final int MAP_ACTIVITY = 3;
-    private static final String strURL = "http://cir112.cafe24.com/mapMarkerInfo.php";
+    private static final String STRING_URI = "http://cir112.cafe24.com/mapMarkerInfo.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,10 +77,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.add(R.id.fragmentReviewBoard, new MapsDownBlank());
-        fragmentTransaction.commit();
 
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
@@ -94,7 +95,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             public void onProviderEnabled(String provider) { }
 
-            public void onProviderDisabled(String provider) {  }
+            public void onProviderDisabled(String provider) { }
         };
 
         // Register the listener with the Location Manager to receive location updates
@@ -138,10 +139,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             myLocationLatitude = lastKnownLocation.getLatitude();
             myLocationLongitude = lastKnownLocation.getLongitude();
 
-            myLocationLatLng = new LatLng(myLocationLatitude, myLocationLongitude);
+            myLocationLatLng = new LatLng(myLocationLatitude,myLocationLongitude);
         }
     }
-
 
     /**
      * Manipulates the map once available.
@@ -154,25 +154,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        GetData gd = new GetData(MAP_ACTIVITY);
+        final int MY_PERMISSIONS_ACCESS_COARSE_LOCATION = 1;
         mMap = googleMap;
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(MapsActivity.this,Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED)
             mMap.setMyLocationEnabled(true);
-        }
 
         mMap.moveCamera(newLatLngZoom(new LatLng(35.154265,128.098157), 16));
 
-        gd.getData(strURL);
-
-        mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(35.180291, 128.107830))
-                .title("JinJu Cityhall")
-                .snippet("Population: 8,174 million (2011)").draggable(true));
-
-        mMap.addMarker(new MarkerOptions()
-                .position(JINJU));
+        getData(STRING_URI,1);
 
         mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(35.154265, 128.098157))
@@ -207,7 +197,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         InsertMaker insertMaker = new InsertMaker();
                         insertMaker.execute(strMyLocationLatLng);
 
-                        mMap.addMarker(new MarkerOptions().position(myLocationLatLng).title(buildName).snippet("이다음엔 어떻게 만들어야 잘 만들었다고 소문이 날까? "));
+                        mMap.addMarker(new MarkerOptions().position(myLocationLatLng).title(buildName).snippet("게시판 열기"));
                     }
                 });
                 adBuilder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
@@ -225,29 +215,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
-    //마커 클릭 이벤트
     @Override
-    public void onInfoWindowClick(Marker marker) {
+    public void onInfoWindowClick(Marker marker) {//마커 인포창 클릭 이벤트
         LatLng markerLocation = marker.getPosition();//선택 마커 위치
 
-        switchFragment(Double.toString(markerLocation.latitude),Double.toString(markerLocation.longitude));
-    }
+        Intent intent = new Intent(getApplicationContext(), ReviewBoardActivity.class);
+        intent.putExtra("building",marker.getTitle());
+        intent.putExtra("latitude",Double.toString(markerLocation.latitude));
+        intent.putExtra("longitude", Double.toString(markerLocation.longitude));
 
-    public void switchFragment(String lat, String lng){
-        ReviewBoardFragment fragment;
-
-        fragment = new ReviewBoardFragment();
-
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragmentReviewBoard, fragment.newInstance(lat,lng));
-        fragmentTransaction.commit();
-
+        startActivity(intent);
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
         switch (requestCode) {
+
             case MY_PERMISSIONS_ACCESS_COARSE_LOCATION: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
@@ -346,7 +330,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     //DB에서 자취방 정보를 가져와 마커 출력
-    protected static void show(String myJson)
+    protected void showMarkerList()
     {
         try
         {
@@ -367,5 +351,51 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void getData(String url,final int mode){
+        class GetDataJson extends AsyncTask<String, Void, String>
+        {
+            @Override
+            protected String doInBackground (String... params)
+            {
+                String strUrl = params[0];
+
+                BufferedReader bufferedReader = null;
+
+                try
+                {
+                    URL url = new URL(strUrl);
+                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                    StringBuilder sb = new StringBuilder();
+
+                    bufferedReader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+
+                    String json;
+
+                    while((json = bufferedReader.readLine())!=null)
+                    {
+                        sb.append(json + "\n");
+                    }
+                    return sb.toString().trim();
+                }catch (Exception e)
+                {
+                    return null;
+                }
+            }
+            protected void onPostExecute(String result)
+            {
+                myJson = result;
+                switch(mode){
+                    case 1:
+                        showMarkerList();
+                    case 2:
+                        //showRoomInfo();
+                }
+
+            }
+        }
+        GetDataJson g = new GetDataJson();
+        g.execute(url);
     }
 }
